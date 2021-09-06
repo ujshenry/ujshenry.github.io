@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+	
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/h.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文介绍java版本的redis工具类（基于jedis客户端实现），方便项目代码访问redis。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis工具类（Java）">
+<meta property="og:url" content="http://blog.jingchenyong.xyz/2021/07/02/redis%E5%B7%A5%E5%85%B7%E7%B1%BB%EF%BC%88Java%EF%BC%89/index.html">
+<meta property="og:site_name" content="Henry Blog">
+<meta property="og:description" content="本文介绍java版本的redis工具类（基于jedis客户端实现），方便项目代码访问redis。">
+<meta property="og:locale">
+<meta property="article:published_time" content="2021-07-02T07:40:33.000Z">
+<meta property="article:modified_time" content="2021-07-05T07:44:19.614Z">
+<meta property="article:author" content="Jing Chenyong">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+  
+  (function(){
+        if(''){
+            if (prompt('请输入文章密码') !== ''){
+                alert('密码错误！');
+                history.back();
+            }
+        }
+    })();
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.jingchenyong.xyz/2021/07/02/redis工具类（Java）/"/>
+
+
+
+
+
+  <title>redis工具类（Java） | Henry Blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Henry Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-个人项目">
+          <a href="/test/hello-world.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            个人项目
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-link"></i> <br />
+            
+            友链
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.jingchenyong.xyz/2021/07/02/redis%E5%B7%A5%E5%85%B7%E7%B1%BB%EF%BC%88Java%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/baby.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Henry Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">redis工具类（Java）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+			
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-07-02T15:40:33+08:00">
+                2021-07-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/redis/" itemprop="url" rel="index">
+                    <span itemprop="name">redis</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/07/02/redis%E5%B7%A5%E5%85%B7%E7%B1%BB%EF%BC%88Java%EF%BC%89/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/07/02/redis%E5%B7%A5%E5%85%B7%E7%B1%BB%EF%BC%88Java%EF%BC%89/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/07/02/redis%E5%B7%A5%E5%85%B7%E7%B1%BB%EF%BC%88Java%EF%BC%89/" class="leancloud_visitors" data-flag-title="redis工具类（Java）">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.3k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  11
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文介绍java版本的redis工具类（基于jedis客户端实现），方便项目代码访问redis。</p>
+<span id="more"></span>
+
+<h2 id="代码骨架"><a href="#代码骨架" class="headerlink" title="代码骨架"></a>代码骨架</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.henry.db.redis.example;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.commons.lang3.StringUtils;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.LoggerFactory;</span><br><span class="line"><span class="keyword">import</span> redis.clients.jedis.Jedis;</span><br><span class="line"><span class="keyword">import</span> redis.clients.jedis.JedisPool;</span><br><span class="line"><span class="keyword">import</span> redis.clients.jedis.JedisPoolConfig;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">JedisUtil</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger LOGGER = LoggerFactory.getLogger(JedisUtil.class);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> JedisPool jedisPool = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> JedisUtil jedisUtil = <span class="keyword">new</span> JedisUtil();</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">JedisUtil</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// Jedis jedis = getJedis();</span></span><br><span class="line">	<span class="comment">// 执行命令操作</span></span><br><span class="line">	<span class="comment">// 关闭redis句柄returnJedis(Jedis jedis)并返回结果</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">static</span> &#123;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			JedisPoolConfig config = <span class="keyword">new</span> JedisPoolConfig();</span><br><span class="line">			config.setMaxTotal(<span class="number">1000</span>);</span><br><span class="line">			config.setMaxIdle(<span class="number">30</span>);</span><br><span class="line">			config.setMinIdle(<span class="number">30</span>);</span><br><span class="line">			config.setMaxWaitMillis(<span class="number">1000</span>);</span><br><span class="line">			config.setTestOnBorrow(<span class="keyword">true</span>);</span><br><span class="line">			config.setTestOnReturn(<span class="keyword">true</span>);</span><br><span class="line">			<span class="comment">// 判断是否需要密码</span></span><br><span class="line">			<span class="keyword">if</span> (StringUtils.isNotBlank(<span class="string">&quot;xxx&quot;</span>)) &#123;</span><br><span class="line">				jedisPool = <span class="keyword">new</span> JedisPool(config, <span class="string">&quot;xxx.xxx.xxx.xxx&quot;</span>, <span class="number">6379</span>, <span class="number">100000</span>, <span class="string">&quot;xxx&quot;</span>);</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				jedisPool = <span class="keyword">new</span> JedisPool(config, <span class="string">&quot;xxx.xxx.xxx.xxx&quot;</span>, <span class="number">6379</span>, <span class="number">100000</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">			LOGGER.error(<span class="string">&quot;初始化连接池失败！: &quot;</span> + e);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 从jedis连接池中获取获取jedis对象</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Jedis <span class="title">getJedis</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		Jedis jedis = <span class="keyword">null</span>;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			jedis = jedisPool.getResource();</span><br><span class="line">			LOGGER.debug(<span class="string">&quot;获取redis连接成功！&quot;</span>);</span><br><span class="line">		&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">			LOGGER.error(<span class="string">&quot;获取redis连接失败！ : &quot;</span> + e.toString());</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> jedis;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 获取JedisUtil实例(供外部访问使用)</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> JedisUtil <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> jedisUtil;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 回收jedis(放到finally中)</span></span><br><span class="line"><span class="comment">	 * </span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> jedis</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">returnJedis</span><span class="params">(Jedis jedis)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="keyword">null</span> != jedis) &#123;</span><br><span class="line">			jedis.close();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="redis操作"><a href="#redis操作" class="headerlink" title="redis操作"></a>redis操作</h2><h3 id="取多个集合中的交集"><a href="#取多个集合中的交集" class="headerlink" title="取多个集合中的交集"></a>取多个集合中的交集</h3><p>public Set<String> setInter(String… keys) {<br>        Jedis jedis = getJedis();<br>        Set<String> values = jedis.sinter(keys);<br>        returnJedis(jedis);<br>        return values;<br>    }</String></String></p>
+<h3 id="取set集合中的元素数量"><a href="#取set集合中的元素数量" class="headerlink" title="取set集合中的元素数量"></a>取set集合中的元素数量</h3><p>public long getSetCount(String key) {<br>        Jedis jedis = getJedis();<br>        long count = jedis.scard(key);<br>        returnJedis(jedis);<br>        return count;<br>    }</p>
+<h3 id="获取set集合中的所有元素"><a href="#获取set集合中的所有元素" class="headerlink" title="获取set集合中的所有元素"></a>获取set集合中的所有元素</h3><p>public Set<String> getSetElements(String key) {<br>        Jedis jedis = getJedis();<br>        Set<String> smembers = jedis.smembers(key);<br>        returnJedis(jedis);<br>        return smembers;<br>    }</String></String></p>
+<h3 id="删除set集合中的某一元素"><a href="#删除set集合中的某一元素" class="headerlink" title="删除set集合中的某一元素"></a>删除set集合中的某一元素</h3><p>public void delSetElements(byte[] key, byte[] member) {<br>        Jedis jedis = getJedis();<br>        jedis.srem(key, member);<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="将多个set集合中的交集保存到指定key并返回交集"><a href="#将多个set集合中的交集保存到指定key并返回交集" class="headerlink" title="将多个set集合中的交集保存到指定key并返回交集"></a>将多个set集合中的交集保存到指定key并返回交集</h3><p>public Set<String> interToDestKey(String destKey, String… keys) {<br>        Jedis jedis = getJedis();<br>        jedis.sinterstore(destKey, keys);<br>        Set<String> mongoIds = jedis.smembers(destKey);<br>        returnJedis(jedis);<br>        return mongoIds;<br>    }</String></String></p>
+<h3 id="将多个set集合中的并集保存到指定key并返回并集"><a href="#将多个set集合中的并集保存到指定key并返回并集" class="headerlink" title="将多个set集合中的并集保存到指定key并返回并集"></a>将多个set集合中的并集保存到指定key并返回并集</h3><p>public Set<String> unionToDestKey(String destKey, String… keys) {<br>        Jedis jedis = getJedis();<br>        jedis.sunionstore(destKey, keys);<br>        Set<String> mongoIds = jedis.smembers(destKey);<br>        returnJedis(jedis);<br>        return mongoIds;<br>    }</String></String></p>
+<h3 id="取多个集合中的并集"><a href="#取多个集合中的并集" class="headerlink" title="取多个集合中的并集"></a>取多个集合中的并集</h3><p>public Set<String> setUnion(String… keys) {<br>        Jedis jedis = getJedis();<br>        Set<String> values = jedis.sunion(keys);<br>        returnJedis(jedis);<br>        return values;<br>    }</String></String></p>
+<h3 id="将第一个key对后面多个key做差集后的数据保存到指定key中并返回结果"><a href="#将第一个key对后面多个key做差集后的数据保存到指定key中并返回结果" class="headerlink" title="将第一个key对后面多个key做差集后的数据保存到指定key中并返回结果"></a>将第一个key对后面多个key做差集后的数据保存到指定key中并返回结果</h3><p>public Set<String> diffToDestKey(String destKey, String… keys) {<br>        Jedis jedis = getJedis();<br>        jedis.sdiffstore(destKey, keys);<br>        Set<String> mongoIds = jedis.smembers(destKey);<br>        returnJedis(jedis);<br>        return mongoIds;<br>    }</String></String></p>
+<h3 id="取第一个key对所有key做差集后的元素集合"><a href="#取第一个key对所有key做差集后的元素集合" class="headerlink" title="取第一个key对所有key做差集后的元素集合"></a>取第一个key对所有key做差集后的元素集合</h3><p>public Set<String> setDiff(String… keys) {<br>        Jedis jedis = getJedis();<br>        Set<String> values = jedis.sdiff(keys);<br>        returnJedis(jedis);<br>        return values;<br>    }</String></String></p>
+<h3 id="添加元素到有序集合sortedSet（设置过期时间）"><a href="#添加元素到有序集合sortedSet（设置过期时间）" class="headerlink" title="添加元素到有序集合sortedSet（设置过期时间）"></a>添加元素到有序集合sortedSet（设置过期时间）</h3><p>public void zadd(String key, String value, double score) {<br>        Jedis jedis = getJedis();<br>        jedis.zadd(key, score, value);<br>        jedis.expire(key, 7200);<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="添加元素到有序集合sortedSet"><a href="#添加元素到有序集合sortedSet" class="headerlink" title="添加元素到有序集合sortedSet"></a>添加元素到有序集合sortedSet</h3><p>public void zadd(byte[] key, byte[] value, double score) {<br>        Jedis jedis = getJedis();<br>        jedis.zadd(key, score, value);<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="添加sorted-set（对有序集合进行长度限制）"><a href="#添加sorted-set（对有序集合进行长度限制）" class="headerlink" title="添加sorted set（对有序集合进行长度限制）"></a>添加sorted set（对有序集合进行长度限制）</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> key     sorted的Key名称</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> value   需要添加的值</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> score   需要添加的分值</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> limit   有序集合需要维持的长度</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> reverse true,当队列达到规定的长度时，删除分值最小的值，false删除最大的值</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">zaddWithLimit</span><span class="params">(String key, String value, <span class="keyword">double</span> score, <span class="keyword">int</span> limit, <span class="keyword">boolean</span> reverse)</span> </span>&#123;</span><br><span class="line">		Jedis jedis = getJedis();</span><br><span class="line">		jedis.zadd(key, score, value);</span><br><span class="line">		<span class="keyword">long</span> totalcount = jedis.zcard(key);</span><br><span class="line">		<span class="keyword">if</span> (limit &lt; totalcount) &#123;</span><br><span class="line">			<span class="keyword">if</span> (reverse) &#123;</span><br><span class="line">				jedis.zremrangeByRank(key, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				jedis.zremrangeByRank(key, totalcount, totalcount);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		returnJedis(jedis);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="设置key的值为value"><a href="#设置key的值为value" class="headerlink" title="设置key的值为value"></a>设置key的值为value</h3><p>public void setKey(String key, String value) {<br>        Jedis jedis = getJedis();<br>        jedis.set(key, value);<br>        returnJedis(jedis);<br>    }</p>
+<p>public void setKey(byte[] key, byte[] value) {<br>        Jedis jedis = getJedis();<br>        jedis.set(key, value);<br>        returnJedis(jedis);<br>    }</p>
+<p>设置key的值为value，并规定Key的失效时间（second）</p>
+<p>public void setKeyWithExpire(String key, int second, String value) {<br>        Jedis jedis = getJedis();<br>        jedis.set(key, value);<br>        jedis.expire(key, second);<br>        returnJedis(jedis);<br>    }</p>
+<p>public void setKeyWithExpire(byte[] key, int second, byte[] value) {<br>        Jedis jedis = getJedis();<br>        jedis.set(key, value);<br>        jedis.expire(key, second);<br>        returnJedis(jedis);<br>    }</p>
+<p>public void setKeyWithExpire(String key, int second) {<br>        Jedis jedis = getJedis();<br>        jedis.expire(key, second);<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="获取指定key的值"><a href="#获取指定key的值" class="headerlink" title="获取指定key的值"></a>获取指定key的值</h3><p>public String getValue(String key) {<br>        Jedis jedis = getJedis();<br>        String value = jedis.get(key);<br>        returnJedis(jedis);<br>        return value;<br>    }</p>
+<p>public byte[] getValue(byte[] key) {<br>        Jedis jedis = getJedis();<br>        byte[] value = jedis.get(key);<br>        returnJedis(jedis);<br>        return value;<br>    }</p>
+<h3 id="获取指定set中的元素集合"><a href="#获取指定set中的元素集合" class="headerlink" title="获取指定set中的元素集合"></a>获取指定set中的元素集合</h3><p>public Set<String> getSetValue(String key) {<br>        Jedis jedis = getJedis();<br>        Set<String> valueSet = jedis.smembers(key);<br>        returnJedis(jedis);<br>        return valueSet;<br>    }</String></String></p>
+<h3 id="返回sortedSet指定范围的集合元素-0为第一个元素，-1为最后一个元素（元素已按由小到大排序）"><a href="#返回sortedSet指定范围的集合元素-0为第一个元素，-1为最后一个元素（元素已按由小到大排序）" class="headerlink" title="返回sortedSet指定范围的集合元素,0为第一个元素，-1为最后一个元素（元素已按由小到大排序）"></a>返回sortedSet指定范围的集合元素,0为第一个元素，-1为最后一个元素（元素已按由小到大排序）</h3><p>public Set<String> zrange(String key, int start, int end) {<br>        Jedis jedis = getJedis();<br>        Set<String> set = jedis.zrange(key, start, end);<br>        returnJedis(jedis);<br>        return set;<br>    }</String></String></p>
+<h3 id="获取给定区间的元素，原始按照权重由高到低排序"><a href="#获取给定区间的元素，原始按照权重由高到低排序" class="headerlink" title="获取给定区间的元素，原始按照权重由高到低排序"></a>获取给定区间的元素，原始按照权重由高到低排序</h3><p>public Set<String> zrevrange(String key, int start, int end) {<br>        Jedis jedis = getJedis();<br>        Set<String> set = jedis.zrevrange(key, start, end);<br>        returnJedis(jedis);<br>        return set;<br>    }</String></String></p>
+<h3 id="添加对应关系，如果对应关系已存在，则覆盖"><a href="#添加对应关系，如果对应关系已存在，则覆盖" class="headerlink" title="添加对应关系，如果对应关系已存在，则覆盖"></a>添加对应关系，如果对应关系已存在，则覆盖</h3><p>public String hmset(String key, Map&lt;String, String&gt; map) {<br>        Jedis jedis = getJedis();<br>        String s = jedis.hmset(key, map);<br>        returnJedis(jedis);<br>        return s;<br>    }</p>
+<h3 id="向List尾部追加记录"><a href="#向List尾部追加记录" class="headerlink" title="向List尾部追加记录"></a>向List尾部追加记录</h3><p>public long rpush(String key, String value) {<br>        Jedis jedis = getJedis();<br>        long count = jedis.rpush(key, value);<br>        returnJedis(jedis);<br>        return count;<br>    }</p>
+<h3 id="向List头部追加记录"><a href="#向List头部追加记录" class="headerlink" title="向List头部追加记录"></a>向List头部追加记录</h3><p>public long lpush(String key, String value) {<br>        Jedis jedis = getJedis();<br>        long count = jedis.lpush(key, value);<br>        returnJedis(jedis);<br>        return count;<br>    }</p>
+<h3 id="截取list并返回截取后的元素"><a href="#截取list并返回截取后的元素" class="headerlink" title="截取list并返回截取后的元素"></a>截取list并返回截取后的元素</h3><p>public List<String> ltrim(String key, int start, int end) {<br>        Jedis jedis = getJedis();<br>        jedis.ltrim(key, start, end);<br>        List<String> list = jedis.lrange(key, 0, -1);<br>        returnJedis(jedis);<br>        return list;<br>    }</String></String></p>
+<h3 id="截取list并返回截取后的元素-1"><a href="#截取list并返回截取后的元素-1" class="headerlink" title="截取list并返回截取后的元素"></a>截取list并返回截取后的元素</h3><p>public List<String> getListElements(String key) {<br>        Jedis jedis = getJedis();<br>        List<String> list = jedis.lrange(key, 0, -1);<br>        returnJedis(jedis);<br>        return list;<br>    }</String></String></p>
+<h3 id="获取list的元素个数"><a href="#获取list的元素个数" class="headerlink" title="获取list的元素个数"></a>获取list的元素个数</h3><p>public long llen(String key) {<br>        Jedis jedis = getJedis();<br>        Long len = jedis.llen(key);<br>        returnJedis(jedis);<br>        return len;<br>    }</p>
+<h3 id="删除指定key"><a href="#删除指定key" class="headerlink" title="删除指定key"></a>删除指定key</h3><p>public long del(String key) {<br>        Jedis jedis = getJedis();<br>        long s = jedis.del(key);<br>        returnJedis(jedis);<br>        return s;<br>    }</p>
+<p>public long del(byte[] key) {<br>        Jedis jedis = getJedis();<br>        long s = jedis.del(key);<br>        returnJedis(jedis);<br>        return s;<br>    }</p>
+<h3 id="向set集合中添加集合数据"><a href="#向set集合中添加集合数据" class="headerlink" title="向set集合中添加集合数据"></a>向set集合中添加集合数据</h3><p>public void addSetWithExpire(String key, Set<String> vaules, int expire) {<br>        Jedis jedis = getJedis();<br>        Pipeline pipeline = jedis.pipelined();<br>        for (String value : vaules) {<br>            pipeline.sadd(key, value);<br>            pipeline.expire(key, expire);<br>        }<br>        pipeline.sync();<br>        returnJedis(jedis);<br>    }</String></p>
+<h3 id="向set集合中添加集合数据，并规定Key的失效时间"><a href="#向set集合中添加集合数据，并规定Key的失效时间" class="headerlink" title="向set集合中添加集合数据，并规定Key的失效时间"></a>向set集合中添加集合数据，并规定Key的失效时间</h3><p>public void updateKeyWithExpire(String key, int second, Set<String> vaules) {<br>        Jedis jedis = getJedis();<br>        jedis.del(key);<br>        Pipeline pipeline = jedis.pipelined();<br>        for (String value : vaules) {<br>            pipeline.sadd(key, value);<br>            pipeline.expire(key, second);<br>        }<br>        pipeline.sync();<br>        returnJedis(jedis);<br>    }</String></p>
+<h3 id="向set集合中添加数据"><a href="#向set集合中添加数据" class="headerlink" title="向set集合中添加数据"></a>向set集合中添加数据</h3><p>public void addSetValue(String key, String value) {<br>        Jedis jedis = getJedis();<br>        jedis.sadd(key, value);<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="向set集合中添加数据-1"><a href="#向set集合中添加数据-1" class="headerlink" title="向set集合中添加数据"></a>向set集合中添加数据</h3><p>public void addSetValue(byte[] key, byte[] value) {<br>        Jedis jedis = getJedis();<br>        jedis.sadd(key, value);<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="向set集合中添加数据，并规定Key的失效时间"><a href="#向set集合中添加数据，并规定Key的失效时间" class="headerlink" title="向set集合中添加数据，并规定Key的失效时间"></a>向set集合中添加数据，并规定Key的失效时间</h3><p>public void addSetValueWithExpire(String key, int second, String value) {<br>        Jedis jedis = getJedis();<br>        jedis.sadd(key, value);<br>        jedis.expire(key, second);<br>        returnJedis(jedis);<br>    }</p>
+<p>public void addSetValueWithExpire(byte[] key, int second, byte[] value) {<br>        Jedis jedis = getJedis();<br>        jedis.sadd(key, value);<br>        jedis.expire(key, second);<br>        returnJedis(jedis);<br>    }</p>
+<p>public void addSetValueWithExpire(String key, int second, String… value) {<br>        if (null == value || value.length == 0) {<br>            return;<br>        }<br>        Jedis jedis = getJedis();<br>        jedis.sadd(key, value);<br>        jedis.expire(key, second);<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="向set集合中添加集合数据，并规定Key的失效时间-1"><a href="#向set集合中添加集合数据，并规定Key的失效时间-1" class="headerlink" title="向set集合中添加集合数据，并规定Key的失效时间"></a>向set集合中添加集合数据，并规定Key的失效时间</h3><p>public void addSetWithExpire(Map&lt;String, Set<String>&gt; valueMap, int second) {<br>        Jedis jedis = getJedis();<br>        Pipeline pipeline = jedis.pipelined();<br>        for (Map.Entry&lt;String, Set<String>&gt; entry : valueMap.entrySet()) {<br>            for (String str : entry.getValue()) {<br>                pipeline.sadd(entry.getKey(), str);<br>                pipeline.expire(entry.getKey(), second);<br>            }<br>        }<br>        pipeline.sync();<br>        returnJedis(jedis);<br>    }</String></String></p>
+<h3 id="向redis队列中发布消息"><a href="#向redis队列中发布消息" class="headerlink" title="向redis队列中发布消息"></a>向redis队列中发布消息</h3><p>public void publishMsg(String channel, Object redisMsg) {<br>        Jedis jedis = getJedis();<br>        jedis.publish(channel.getBytes(Charset.forName(“UTF-8”)), SerializeUtil.serialize(redisMsg));<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="向redis队列中发布消息-1"><a href="#向redis队列中发布消息-1" class="headerlink" title="向redis队列中发布消息"></a>向redis队列中发布消息</h3><p>public void publishMsg(byte[] channel, byte[] redisMsg) {<br>        Jedis jedis = getJedis();<br>        jedis.publish(channel, redisMsg);<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="是否存在KEY"><a href="#是否存在KEY" class="headerlink" title="是否存在KEY"></a>是否存在KEY</h3><p>public boolean exists(String key) {<br>        Jedis jedis = getJedis();<br>        boolean exists = jedis.exists(key);<br>        returnJedis(jedis);<br>        return exists;<br>    }</p>
+<p>public boolean exists(byte[] key) {<br>        Jedis jedis = getJedis();<br>        boolean exists = jedis.exists(key);<br>        returnJedis(jedis);<br>        return exists;<br>    }</p>
+<h3 id="重命名KEY"><a href="#重命名KEY" class="headerlink" title="重命名KEY"></a>重命名KEY</h3><p>public String rename(String oldKey, String newKey) {<br>        Jedis jedis = getJedis();<br>        String result = jedis.rename(oldKey, newKey);<br>        returnJedis(jedis);<br>        return result;<br>    }</p>
+<h3 id="设置失效时间"><a href="#设置失效时间" class="headerlink" title="设置失效时间"></a>设置失效时间</h3><p>public void expire(String key, int seconds) {<br>        Jedis jedis = getJedis();<br>        jedis.expire(key, seconds);<br>        returnJedis(jedis);<br>    }</p>
+<p>public void expire(byte[] key, int seconds) {<br>        Jedis jedis = getJedis();<br>        jedis.expire(key, seconds);<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="删除失效时间"><a href="#删除失效时间" class="headerlink" title="删除失效时间"></a>删除失效时间</h3><p>public void persist(String key) {<br>        Jedis jedis = getJedis();<br>        jedis.persist(key);<br>        returnJedis(jedis);<br>    }</p>
+<p>public void persist(byte[] key) {<br>        Jedis jedis = getJedis();<br>        jedis.persist(key);<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="添加一个键值对，如果键存在不在添加，如果不存在，添加完成以后设置键的有效期"><a href="#添加一个键值对，如果键存在不在添加，如果不存在，添加完成以后设置键的有效期" class="headerlink" title="添加一个键值对，如果键存在不在添加，如果不存在，添加完成以后设置键的有效期"></a>添加一个键值对，如果键存在不在添加，如果不存在，添加完成以后设置键的有效期</h3><p>public void setnxWithTimeOut(String key, String value, int timeOut) {<br>        Jedis jedis = getJedis();<br>        if (0 != jedis.setnx(key, value)) {<br>            jedis.expire(key, timeOut);<br>        }<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="返回指定key序列值"><a href="#返回指定key序列值" class="headerlink" title="返回指定key序列值"></a>返回指定key序列值</h3><p>public long incr(String key) {<br>        Jedis jedis = getJedis();<br>        long number = jedis.incr(key);<br>        returnJedis(jedis);<br>        return number ;<br>    }</p>
+<h3 id="按照给处的key顺序查看list-并在找到的第一个非空list的尾部弹出一个元素-没有元素时，会阻塞至超时timeout"><a href="#按照给处的key顺序查看list-并在找到的第一个非空list的尾部弹出一个元素-没有元素时，会阻塞至超时timeout" class="headerlink" title="按照给处的key顺序查看list,并在找到的第一个非空list的尾部弹出一个元素 没有元素时，会阻塞至超时timeout"></a>按照给处的key顺序查看list,并在找到的第一个非空list的尾部弹出一个元素 没有元素时，会阻塞至超时timeout</h3><p>public List&lt;byte[]&gt; brpop(int timeout, byte[]… keys) {<br>        Jedis jedis = getJedis();<br>        List&lt;byte[]&gt; brpop = jedis.brpop(timeout, keys);<br>        returnJedis(jedis);<br>        return brpop;<br>    }</p>
+<h3 id="按照给处的key顺序查看list-并在找到的第一个非空list的尾部弹出一个元素-没有元素时，会阻塞至超时timeout-1"><a href="#按照给处的key顺序查看list-并在找到的第一个非空list的尾部弹出一个元素-没有元素时，会阻塞至超时timeout-1" class="headerlink" title="按照给处的key顺序查看list,并在找到的第一个非空list的尾部弹出一个元素 没有元素时，会阻塞至超时timeout"></a>按照给处的key顺序查看list,并在找到的第一个非空list的尾部弹出一个元素 没有元素时，会阻塞至超时timeout</h3><p>public List<String> brpop(int timeout, String… keys) {<br>        Jedis jedis = getJedis();<br>        List<String> brpop = jedis.brpop(timeout, keys);<br>        returnJedis(jedis);<br>        return brpop;<br>    }</String></String></p>
+<h3 id="list添加元素并设置过期时间（过期后整个key删除）"><a href="#list添加元素并设置过期时间（过期后整个key删除）" class="headerlink" title="list添加元素并设置过期时间（过期后整个key删除）"></a>list添加元素并设置过期时间（过期后整个key删除）</h3><p>public void lpushValue(byte[] key, byte[] messgaes, String taskId) {<br>        Jedis tmpJedis = getJedis();<br>        tmpJedis.lpush(key, messgaes);<br>        tmpJedis.expire(key, 7200);<br>        tmpJedis.close();<br>    }</p>
+<p>public void addListValueWithExpire(String key, int second, String… value) {<br>        if (null == value || value.length == 0) {<br>            return;<br>        }<br>        Jedis jedis = getJedis();<br>        jedis.rpush(key, value);<br>        jedis.expire(key, second);<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="为哈希表中字段赋值，并设置key的过期时间-如果哈希表不存在，一个新的将被创建（并设置过期时间）"><a href="#为哈希表中字段赋值，并设置key的过期时间-如果哈希表不存在，一个新的将被创建（并设置过期时间）" class="headerlink" title="为哈希表中字段赋值，并设置key的过期时间 如果哈希表不存在，一个新的将被创建（并设置过期时间）"></a>为哈希表中字段赋值，并设置key的过期时间 如果哈希表不存在，一个新的将被创建（并设置过期时间）</h3><p>public void hsetWithExpire(String key, String field, String value, int expire) {<br>        Jedis jedis = getJedis();<br>        jedis.hset(key, field, value);<br>        jedis.expire(key, expire);<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="为哈希表中字段赋值，并设置key的过期时间-如果哈希表不存在，一个新的将被创建"><a href="#为哈希表中字段赋值，并设置key的过期时间-如果哈希表不存在，一个新的将被创建" class="headerlink" title="为哈希表中字段赋值，并设置key的过期时间 如果哈希表不存在，一个新的将被创建"></a>为哈希表中字段赋值，并设置key的过期时间 如果哈希表不存在，一个新的将被创建</h3><p>public void hset(String key, String field, String value) {<br>        Jedis jedis = getJedis();<br>        jedis.hset(key, field, value);<br>        returnJedis(jedis);<br>    }</p>
+<h3 id="获取哈希表-key-中，所有的属性名和属性值"><a href="#获取哈希表-key-中，所有的属性名和属性值" class="headerlink" title="获取哈希表 key 中，所有的属性名和属性值"></a>获取哈希表 key 中，所有的属性名和属性值</h3><p>public Map&lt;String, String&gt; hgetAll(String key) {<br>        Jedis jedis = getJedis();<br>        Map&lt;String, String&gt; res = jedis.hgetAll(key);<br>        returnJedis(jedis);<br>        return res;<br>    }</p>
+<p>public String hget(String key, String field) {<br>        Jedis jedis = getJedis();<br>        String res = jedis.hget(key, field);<br>        returnJedis(jedis);<br>        return res;<br>    }</p>
+<p>public boolean hexists(String key, String field) {<br>        Jedis jedis = getJedis();<br>        boolean res = jedis.hexists(key, field);<br>        returnJedis(jedis);<br>        return res;<br>    }</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Jing Chenyong
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div id="needsharebutton-postbottom">
+            <span class="btn">
+              <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </span>
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/07/02/redis/" rel="next" title="redis">
+                <i class="fa fa-chevron-left"></i> redis
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/07/02/redis%E4%BA%8B%E5%8A%A1/" rel="prev" title="redis事务">
+                redis事务 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/baby.jpg"
+                alt="" />
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E9%AA%A8%E6%9E%B6"><span class="nav-number">1.</span> <span class="nav-text">代码骨架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis%E6%93%8D%E4%BD%9C"><span class="nav-number">2.</span> <span class="nav-text">redis操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%96%E5%A4%9A%E4%B8%AA%E9%9B%86%E5%90%88%E4%B8%AD%E7%9A%84%E4%BA%A4%E9%9B%86"><span class="nav-number">2.1.</span> <span class="nav-text">取多个集合中的交集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%96set%E9%9B%86%E5%90%88%E4%B8%AD%E7%9A%84%E5%85%83%E7%B4%A0%E6%95%B0%E9%87%8F"><span class="nav-number">2.2.</span> <span class="nav-text">取set集合中的元素数量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96set%E9%9B%86%E5%90%88%E4%B8%AD%E7%9A%84%E6%89%80%E6%9C%89%E5%85%83%E7%B4%A0"><span class="nav-number">2.3.</span> <span class="nav-text">获取set集合中的所有元素</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4set%E9%9B%86%E5%90%88%E4%B8%AD%E7%9A%84%E6%9F%90%E4%B8%80%E5%85%83%E7%B4%A0"><span class="nav-number">2.4.</span> <span class="nav-text">删除set集合中的某一元素</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%86%E5%A4%9A%E4%B8%AAset%E9%9B%86%E5%90%88%E4%B8%AD%E7%9A%84%E4%BA%A4%E9%9B%86%E4%BF%9D%E5%AD%98%E5%88%B0%E6%8C%87%E5%AE%9Akey%E5%B9%B6%E8%BF%94%E5%9B%9E%E4%BA%A4%E9%9B%86"><span class="nav-number">2.5.</span> <span class="nav-text">将多个set集合中的交集保存到指定key并返回交集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%86%E5%A4%9A%E4%B8%AAset%E9%9B%86%E5%90%88%E4%B8%AD%E7%9A%84%E5%B9%B6%E9%9B%86%E4%BF%9D%E5%AD%98%E5%88%B0%E6%8C%87%E5%AE%9Akey%E5%B9%B6%E8%BF%94%E5%9B%9E%E5%B9%B6%E9%9B%86"><span class="nav-number">2.6.</span> <span class="nav-text">将多个set集合中的并集保存到指定key并返回并集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%96%E5%A4%9A%E4%B8%AA%E9%9B%86%E5%90%88%E4%B8%AD%E7%9A%84%E5%B9%B6%E9%9B%86"><span class="nav-number">2.7.</span> <span class="nav-text">取多个集合中的并集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%86%E7%AC%AC%E4%B8%80%E4%B8%AAkey%E5%AF%B9%E5%90%8E%E9%9D%A2%E5%A4%9A%E4%B8%AAkey%E5%81%9A%E5%B7%AE%E9%9B%86%E5%90%8E%E7%9A%84%E6%95%B0%E6%8D%AE%E4%BF%9D%E5%AD%98%E5%88%B0%E6%8C%87%E5%AE%9Akey%E4%B8%AD%E5%B9%B6%E8%BF%94%E5%9B%9E%E7%BB%93%E6%9E%9C"><span class="nav-number">2.8.</span> <span class="nav-text">将第一个key对后面多个key做差集后的数据保存到指定key中并返回结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%96%E7%AC%AC%E4%B8%80%E4%B8%AAkey%E5%AF%B9%E6%89%80%E6%9C%89key%E5%81%9A%E5%B7%AE%E9%9B%86%E5%90%8E%E7%9A%84%E5%85%83%E7%B4%A0%E9%9B%86%E5%90%88"><span class="nav-number">2.9.</span> <span class="nav-text">取第一个key对所有key做差集后的元素集合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E5%85%83%E7%B4%A0%E5%88%B0%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88sortedSet%EF%BC%88%E8%AE%BE%E7%BD%AE%E8%BF%87%E6%9C%9F%E6%97%B6%E9%97%B4%EF%BC%89"><span class="nav-number">2.10.</span> <span class="nav-text">添加元素到有序集合sortedSet（设置过期时间）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E5%85%83%E7%B4%A0%E5%88%B0%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88sortedSet"><span class="nav-number">2.11.</span> <span class="nav-text">添加元素到有序集合sortedSet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0sorted-set%EF%BC%88%E5%AF%B9%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88%E8%BF%9B%E8%A1%8C%E9%95%BF%E5%BA%A6%E9%99%90%E5%88%B6%EF%BC%89"><span class="nav-number">2.12.</span> <span class="nav-text">添加sorted set（对有序集合进行长度限制）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AEkey%E7%9A%84%E5%80%BC%E4%B8%BAvalue"><span class="nav-number">2.13.</span> <span class="nav-text">设置key的值为value</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E6%8C%87%E5%AE%9Akey%E7%9A%84%E5%80%BC"><span class="nav-number">2.14.</span> <span class="nav-text">获取指定key的值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E6%8C%87%E5%AE%9Aset%E4%B8%AD%E7%9A%84%E5%85%83%E7%B4%A0%E9%9B%86%E5%90%88"><span class="nav-number">2.15.</span> <span class="nav-text">获取指定set中的元素集合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%94%E5%9B%9EsortedSet%E6%8C%87%E5%AE%9A%E8%8C%83%E5%9B%B4%E7%9A%84%E9%9B%86%E5%90%88%E5%85%83%E7%B4%A0-0%E4%B8%BA%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%85%83%E7%B4%A0%EF%BC%8C-1%E4%B8%BA%E6%9C%80%E5%90%8E%E4%B8%80%E4%B8%AA%E5%85%83%E7%B4%A0%EF%BC%88%E5%85%83%E7%B4%A0%E5%B7%B2%E6%8C%89%E7%94%B1%E5%B0%8F%E5%88%B0%E5%A4%A7%E6%8E%92%E5%BA%8F%EF%BC%89"><span class="nav-number">2.16.</span> <span class="nav-text">返回sortedSet指定范围的集合元素,0为第一个元素，-1为最后一个元素（元素已按由小到大排序）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E7%BB%99%E5%AE%9A%E5%8C%BA%E9%97%B4%E7%9A%84%E5%85%83%E7%B4%A0%EF%BC%8C%E5%8E%9F%E5%A7%8B%E6%8C%89%E7%85%A7%E6%9D%83%E9%87%8D%E7%94%B1%E9%AB%98%E5%88%B0%E4%BD%8E%E6%8E%92%E5%BA%8F"><span class="nav-number">2.17.</span> <span class="nav-text">获取给定区间的元素，原始按照权重由高到低排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB%EF%BC%8C%E5%A6%82%E6%9E%9C%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB%E5%B7%B2%E5%AD%98%E5%9C%A8%EF%BC%8C%E5%88%99%E8%A6%86%E7%9B%96"><span class="nav-number">2.18.</span> <span class="nav-text">添加对应关系，如果对应关系已存在，则覆盖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91List%E5%B0%BE%E9%83%A8%E8%BF%BD%E5%8A%A0%E8%AE%B0%E5%BD%95"><span class="nav-number">2.19.</span> <span class="nav-text">向List尾部追加记录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91List%E5%A4%B4%E9%83%A8%E8%BF%BD%E5%8A%A0%E8%AE%B0%E5%BD%95"><span class="nav-number">2.20.</span> <span class="nav-text">向List头部追加记录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%AA%E5%8F%96list%E5%B9%B6%E8%BF%94%E5%9B%9E%E6%88%AA%E5%8F%96%E5%90%8E%E7%9A%84%E5%85%83%E7%B4%A0"><span class="nav-number">2.21.</span> <span class="nav-text">截取list并返回截取后的元素</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%AA%E5%8F%96list%E5%B9%B6%E8%BF%94%E5%9B%9E%E6%88%AA%E5%8F%96%E5%90%8E%E7%9A%84%E5%85%83%E7%B4%A0-1"><span class="nav-number">2.22.</span> <span class="nav-text">截取list并返回截取后的元素</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96list%E7%9A%84%E5%85%83%E7%B4%A0%E4%B8%AA%E6%95%B0"><span class="nav-number">2.23.</span> <span class="nav-text">获取list的元素个数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E6%8C%87%E5%AE%9Akey"><span class="nav-number">2.24.</span> <span class="nav-text">删除指定key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91set%E9%9B%86%E5%90%88%E4%B8%AD%E6%B7%BB%E5%8A%A0%E9%9B%86%E5%90%88%E6%95%B0%E6%8D%AE"><span class="nav-number">2.25.</span> <span class="nav-text">向set集合中添加集合数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91set%E9%9B%86%E5%90%88%E4%B8%AD%E6%B7%BB%E5%8A%A0%E9%9B%86%E5%90%88%E6%95%B0%E6%8D%AE%EF%BC%8C%E5%B9%B6%E8%A7%84%E5%AE%9AKey%E7%9A%84%E5%A4%B1%E6%95%88%E6%97%B6%E9%97%B4"><span class="nav-number">2.26.</span> <span class="nav-text">向set集合中添加集合数据，并规定Key的失效时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91set%E9%9B%86%E5%90%88%E4%B8%AD%E6%B7%BB%E5%8A%A0%E6%95%B0%E6%8D%AE"><span class="nav-number">2.27.</span> <span class="nav-text">向set集合中添加数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91set%E9%9B%86%E5%90%88%E4%B8%AD%E6%B7%BB%E5%8A%A0%E6%95%B0%E6%8D%AE-1"><span class="nav-number">2.28.</span> <span class="nav-text">向set集合中添加数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91set%E9%9B%86%E5%90%88%E4%B8%AD%E6%B7%BB%E5%8A%A0%E6%95%B0%E6%8D%AE%EF%BC%8C%E5%B9%B6%E8%A7%84%E5%AE%9AKey%E7%9A%84%E5%A4%B1%E6%95%88%E6%97%B6%E9%97%B4"><span class="nav-number">2.29.</span> <span class="nav-text">向set集合中添加数据，并规定Key的失效时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91set%E9%9B%86%E5%90%88%E4%B8%AD%E6%B7%BB%E5%8A%A0%E9%9B%86%E5%90%88%E6%95%B0%E6%8D%AE%EF%BC%8C%E5%B9%B6%E8%A7%84%E5%AE%9AKey%E7%9A%84%E5%A4%B1%E6%95%88%E6%97%B6%E9%97%B4-1"><span class="nav-number">2.30.</span> <span class="nav-text">向set集合中添加集合数据，并规定Key的失效时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91redis%E9%98%9F%E5%88%97%E4%B8%AD%E5%8F%91%E5%B8%83%E6%B6%88%E6%81%AF"><span class="nav-number">2.31.</span> <span class="nav-text">向redis队列中发布消息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91redis%E9%98%9F%E5%88%97%E4%B8%AD%E5%8F%91%E5%B8%83%E6%B6%88%E6%81%AF-1"><span class="nav-number">2.32.</span> <span class="nav-text">向redis队列中发布消息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8KEY"><span class="nav-number">2.33.</span> <span class="nav-text">是否存在KEY</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E5%91%BD%E5%90%8DKEY"><span class="nav-number">2.34.</span> <span class="nav-text">重命名KEY</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E5%A4%B1%E6%95%88%E6%97%B6%E9%97%B4"><span class="nav-number">2.35.</span> <span class="nav-text">设置失效时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E5%A4%B1%E6%95%88%E6%97%B6%E9%97%B4"><span class="nav-number">2.36.</span> <span class="nav-text">删除失效时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E4%B8%80%E4%B8%AA%E9%94%AE%E5%80%BC%E5%AF%B9%EF%BC%8C%E5%A6%82%E6%9E%9C%E9%94%AE%E5%AD%98%E5%9C%A8%E4%B8%8D%E5%9C%A8%E6%B7%BB%E5%8A%A0%EF%BC%8C%E5%A6%82%E6%9E%9C%E4%B8%8D%E5%AD%98%E5%9C%A8%EF%BC%8C%E6%B7%BB%E5%8A%A0%E5%AE%8C%E6%88%90%E4%BB%A5%E5%90%8E%E8%AE%BE%E7%BD%AE%E9%94%AE%E7%9A%84%E6%9C%89%E6%95%88%E6%9C%9F"><span class="nav-number">2.37.</span> <span class="nav-text">添加一个键值对，如果键存在不在添加，如果不存在，添加完成以后设置键的有效期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E%E6%8C%87%E5%AE%9Akey%E5%BA%8F%E5%88%97%E5%80%BC"><span class="nav-number">2.38.</span> <span class="nav-text">返回指定key序列值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E7%85%A7%E7%BB%99%E5%A4%84%E7%9A%84key%E9%A1%BA%E5%BA%8F%E6%9F%A5%E7%9C%8Blist-%E5%B9%B6%E5%9C%A8%E6%89%BE%E5%88%B0%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E9%9D%9E%E7%A9%BAlist%E7%9A%84%E5%B0%BE%E9%83%A8%E5%BC%B9%E5%87%BA%E4%B8%80%E4%B8%AA%E5%85%83%E7%B4%A0-%E6%B2%A1%E6%9C%89%E5%85%83%E7%B4%A0%E6%97%B6%EF%BC%8C%E4%BC%9A%E9%98%BB%E5%A1%9E%E8%87%B3%E8%B6%85%E6%97%B6timeout"><span class="nav-number">2.39.</span> <span class="nav-text">按照给处的key顺序查看list,并在找到的第一个非空list的尾部弹出一个元素 没有元素时，会阻塞至超时timeout</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E7%85%A7%E7%BB%99%E5%A4%84%E7%9A%84key%E9%A1%BA%E5%BA%8F%E6%9F%A5%E7%9C%8Blist-%E5%B9%B6%E5%9C%A8%E6%89%BE%E5%88%B0%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E9%9D%9E%E7%A9%BAlist%E7%9A%84%E5%B0%BE%E9%83%A8%E5%BC%B9%E5%87%BA%E4%B8%80%E4%B8%AA%E5%85%83%E7%B4%A0-%E6%B2%A1%E6%9C%89%E5%85%83%E7%B4%A0%E6%97%B6%EF%BC%8C%E4%BC%9A%E9%98%BB%E5%A1%9E%E8%87%B3%E8%B6%85%E6%97%B6timeout-1"><span class="nav-number">2.40.</span> <span class="nav-text">按照给处的key顺序查看list,并在找到的第一个非空list的尾部弹出一个元素 没有元素时，会阻塞至超时timeout</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#list%E6%B7%BB%E5%8A%A0%E5%85%83%E7%B4%A0%E5%B9%B6%E8%AE%BE%E7%BD%AE%E8%BF%87%E6%9C%9F%E6%97%B6%E9%97%B4%EF%BC%88%E8%BF%87%E6%9C%9F%E5%90%8E%E6%95%B4%E4%B8%AAkey%E5%88%A0%E9%99%A4%EF%BC%89"><span class="nav-number">2.41.</span> <span class="nav-text">list添加元素并设置过期时间（过期后整个key删除）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E5%93%88%E5%B8%8C%E8%A1%A8%E4%B8%AD%E5%AD%97%E6%AE%B5%E8%B5%8B%E5%80%BC%EF%BC%8C%E5%B9%B6%E8%AE%BE%E7%BD%AEkey%E7%9A%84%E8%BF%87%E6%9C%9F%E6%97%B6%E9%97%B4-%E5%A6%82%E6%9E%9C%E5%93%88%E5%B8%8C%E8%A1%A8%E4%B8%8D%E5%AD%98%E5%9C%A8%EF%BC%8C%E4%B8%80%E4%B8%AA%E6%96%B0%E7%9A%84%E5%B0%86%E8%A2%AB%E5%88%9B%E5%BB%BA%EF%BC%88%E5%B9%B6%E8%AE%BE%E7%BD%AE%E8%BF%87%E6%9C%9F%E6%97%B6%E9%97%B4%EF%BC%89"><span class="nav-number">2.42.</span> <span class="nav-text">为哈希表中字段赋值，并设置key的过期时间 如果哈希表不存在，一个新的将被创建（并设置过期时间）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E5%93%88%E5%B8%8C%E8%A1%A8%E4%B8%AD%E5%AD%97%E6%AE%B5%E8%B5%8B%E5%80%BC%EF%BC%8C%E5%B9%B6%E8%AE%BE%E7%BD%AEkey%E7%9A%84%E8%BF%87%E6%9C%9F%E6%97%B6%E9%97%B4-%E5%A6%82%E6%9E%9C%E5%93%88%E5%B8%8C%E8%A1%A8%E4%B8%8D%E5%AD%98%E5%9C%A8%EF%BC%8C%E4%B8%80%E4%B8%AA%E6%96%B0%E7%9A%84%E5%B0%86%E8%A2%AB%E5%88%9B%E5%BB%BA"><span class="nav-number">2.43.</span> <span class="nav-text">为哈希表中字段赋值，并设置key的过期时间 如果哈希表不存在，一个新的将被创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E5%93%88%E5%B8%8C%E8%A1%A8-key-%E4%B8%AD%EF%BC%8C%E6%89%80%E6%9C%89%E7%9A%84%E5%B1%9E%E6%80%A7%E5%90%8D%E5%92%8C%E5%B1%9E%E6%80%A7%E5%80%BC"><span class="nav-number">2.44.</span> <span class="nav-text">获取哈希表 key 中，所有的属性名和属性值</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jing Chenyong</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">45.4k</span>
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'SSC3O9nAuF0D7JiwkCRaCMU8-gzGzoHsz',
+        appKey: 'bljJ0Jy6rAMnAdcavu8Oc8WV',
+        placeholder: '欢迎畅所欲言~',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("SSC3O9nAuF0D7JiwkCRaCMU8-gzGzoHsz", "bljJ0Jy6rAMnAdcavu8Oc8WV");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "default";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "default";
+      
+          flOptions.boxForm = "vertical";
+      
+          flOptions.position = "topRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/src/clicklove.js"></script>
+  
+    <!-- 代码块复制功能 -->
+  <script type="text/javascript" src="/js/src/clipboard.min.js"></script>  
+  <script type="text/javascript" src="/js/src/clipboard-use.js"></script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>
